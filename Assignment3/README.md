@@ -25,7 +25,7 @@ In this assignment, Cross-Entropy Loss are used.
 In assignment 2, I implemented cyclical learning rate as my learning rate scheduler. One should set the hyper-parameter `--min_eta`, `--max_eta` and `--n_s` to the trainer.
 - `--min_eta` is the minimum learning rate on cyclical learning rate.
 - `--max_eta` is the maximum learning rate on the cyclical learning rate.
-- `--n_s` is the number of cycle during training.
+- `--n_s` is the hyper-parameter of cyclical learning rate strategy.
 
 ## Weight Initialization
 
