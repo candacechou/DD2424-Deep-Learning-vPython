@@ -21,6 +21,8 @@ applied to CIFAR10
     - Batch Normalization
     - Optimizer : Adam.
 4. Assignment 4: A vanilla RNN to synthesize English text characters trained on The Goblet of Fire by J.K. Rowling
+    - Optimizer : Adagrad, RMSProp.
+    - Gradient Clipping.
 
 ## Datasets
 
@@ -38,6 +40,10 @@ For Assignment 2 and 3:
     - validation data: data_batch_2.
     - test data: test_batch.
 data_batch_1, data_batch_2 and test_batch should be put under the directory of ```./Dataset/cifar```.
+
+For Assignment 4:
+    - The Goblet of Fire by J.K. Rowling.
+    - The txt file of the book should be put under the directory of ```./Dataset/JK-Rowling```.
 
 ## Model Training
 
@@ -64,6 +70,12 @@ Run
 ```
 python SVMtrainer.py --batch_size BATCHSIZE --epoch EPOCH --lr LR --lmda LAMBDA --outdir <OUTDIR_PATH> --Xavier True --shuffle False --lr_scheduler True
 ```
+
+For example 
+
+```
+python SVMtrainer.py --batch_size 200 --epoch 20 --lr 0.001 --lmda 0.0001 --outdir ./result --Xavier True --shuffle False --lr_scheduler True
+```
 #### Assignment 1: Ensemble Learning
 
 Run
@@ -74,7 +86,12 @@ python ensemble.py --epch EPOCH --num_ensemble NUM_ENSEMBLE --outdir <OUTDIRPATH
 
 where **NUM_ENSEMBLE** is the number of model we'd like to train for the voting. The details of the algorithm can be found in ```./Assignment1/README.md```
 
+For example:
 
+```
+python3 ensemble.py --epch 20 --num_ensemble 20 --outdir ./result --softVote False 
+
+```
 ### Assignment 2
 
 Run 
@@ -101,3 +118,16 @@ For example:
 python3 trainer.py --batch_size 200 --epoch 20 --lmda 0.001 --Initialize He --outdir ./result --num_layer 5 --num_nodes 50 40 30 20  --min_lr 1e-4 --max_lr 1e-2 --n_s 2 --Dropout True --Adam True
 ```
 
+### Assignement 4
+
+Run 
+
+```
+python3 trainer.py --epoch EPOCH --lr LR --sig SIG --m M --seq_len SEQUENCE_LENGTH --optimizer adagrad
+```
+
+For example 
+
+```
+python3 trainer.py --epoch 10 --lr 0.001 --sig 0.01 --m 100 --seq_len 25 --optimizer adagrad
+```
