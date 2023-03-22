@@ -123,11 +123,11 @@ python3 trainer.py --batch_size 200 --epoch 20 --lmda 0.001 --Initialize He --ou
 Run 
 
 ```
-python3 trainer.py --epoch EPOCH --lr LR --sig SIG --m M --seq_len SEQUENCE_LENGTH --optimizer adagrad
+python3 trainer.py --epoch EPOCH --lr LR --sig SIG --m M --seq_len SEQUENCE_LENGTH --text_len TEXT_LEN --optimizer adagrad
 ```
 
 For example 
 
 ```
-python3 trainer.py --epoch 10 --lr 0.001 --sig 0.01 --m 100 --seq_len 25 --optimizer adagrad
+python3 trainer.py --epoch 10 --lr 0.001 --sig 0.01 --m 100 --seq_len 25  --text_len 200 --optimizer adagrad
 ```

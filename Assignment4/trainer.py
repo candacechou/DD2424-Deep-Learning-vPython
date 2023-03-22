@@ -2,6 +2,7 @@ import numpy as np
 import io 
 import argparse
 import matplotlib.pyplot as plt
+import os
 eps = 1e-8
 
 def loadDataset(filenames):
@@ -38,6 +39,7 @@ class VanillaRNN():
                 eta = 0.1,
                 m = 100,
                 seq_len = 25,
+                text_len = 25,
                 optimizer = "adagrad"):
 
         ### training data
@@ -51,6 +53,7 @@ class VanillaRNN():
         self.eta = eta
         self.m = m
         self.seq_len = seq_len
+        self.text_len = text_len
 
         ### initialization
         self.U = np.random.normal(0,sig,(self.m,self.k))
@@ -108,13 +111,15 @@ class VanillaRNN():
         H = np.zeros((self.m,x.shape[1]+1))
         A = np.zeros((self.m,x.shape[1]))
         H[:,0] = h[:,0]
+        Old_h = h
         for i in range(x.shape[1]):
             
-            a_t,h,o_t,p_t = self.forwardPass(h,x[:,i])
+            a_t,new_h,o_t,p_t = self.forwardPass(Old_h,x[:,i])
             A[:,i] = a_t[:,0]
-            H[:,i+1] = h[:,0]
+            H[:,i+1] = new_h[:,0]
             O[:,i] = o_t[:,0]
             P[:,i] = p_t[:,0]
+            Old_h = new_h
         
         return A, P, O, H
 
@@ -142,16 +147,14 @@ class VanillaRNN():
             g = -(y_t - p_t).T
             
              
-            
-            
-            grad_h = np.dot((self.V).T, g.T) + np.dot(self.W.T, grad_a)
-            grad_a = grad_h * (1 - h_t**2)
+            grad_h = (self.V).T@g.T + self.W.T@grad_a
+            grad_a = np.multiply(grad_h ,(1 - h_t**2))
 
-            g = grad_a
-            self.grad_b  += g
             
-            self.grad_W  += np.matmul(g,ph_t.T)
-            self.grad_U  += np.matmul(g, x_t.T)
+            self.grad_b  += grad_a
+            
+            self.grad_W  += grad_a@ph_t.T
+            self.grad_U  += grad_a@x_t.T
         
             
 
@@ -232,7 +235,7 @@ class VanillaRNN():
                     hprev = np.zeros((self.m, 1))
                     print(hprev.shape)
                 else:
-                    hprev = H[:,1]
+                    hprev = H[:,-1]
                     hprev = hprev[:,np.newaxis]
                 
 
@@ -251,12 +254,12 @@ class VanillaRNN():
 
                     print("----------------------------------")
                     synth = self.synthesizeText(
-                        hprev, x_one_hot[:, 0], y_one_hot, 200)
+                        hprev, x_one_hot[:, 0], y_one_hot)
                     decoded_text = self.decodeOneHot(synth)
                     print(decoded_text)
                     print("----------------------------------")
 
-                    if self.min_loss < smooth_loss :
+                    if self.min_loss > smooth_loss :
                         self.min_loss = smooth_loss
                         self.min_loss_text = decoded_text
                         
@@ -270,13 +273,14 @@ class VanillaRNN():
         print(self.min_loss_text)
 
     def plotLoss(self):
-        filename = "result/loss.jpg"
+        filename = "./result/loss.jpg"
+        if not os.path.exists("./result"):
+            os.mkdir("./result")
         plt.figure()
         plt.plot(range(len(self.losses)),self.losses)    
         plt.title("The loss of each iterations")
         plt.xlabel("iterations")
         plt.ylabel("loss")
-        plt.legend()
         plt.savefig(filename)  
 
     def decodeOneHot(self, text):
@@ -287,12 +291,12 @@ class VanillaRNN():
 
         return chars
 
-    def synthesizeText(self,h,x,y,n):
+    def synthesizeText(self,h,x,y):
         """
         """
         synthesized_text = []
 
-        for i in range(n):
+        for i in range(self.text_len):
 
             _, _, _, p_i = self.forwardPass(h, x)
             cp = np.cumsum(p_i, axis=0)
@@ -315,6 +319,7 @@ def main():
     parser.add_argument('--sig', default = 0.1, type=float, help = "random sig ")
     parser.add_argument('--m', default=100, type= int, help = "dimensionality of its hidden state")
     parser.add_argument('--seq_len', default= 25, type= int, help = "length of the input sequences")
+    parser.add_argument('--text_len', default= 100, type= int, help = "length of the text on synthesis")
     parser.add_argument('--optimizer', default= "adagrad", type= str, help = "choose optimizer :[adagrad, RMSprop], (default adagrad)")
 
     args = parser.parse_args()
@@ -328,6 +333,7 @@ def main():
                          eta = args.lr,
                            m = args.m,
                      seq_len = args.seq_len,
+                     text_len = args.text_len,
                     optimizer = args.optimizer)
 
     trainer.train()
