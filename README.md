@@ -89,7 +89,7 @@ where **NUM_ENSEMBLE** is the number of model we'd like to train for the voting.
 For example:
 
 ```
-python3 ensemble.py --epch 20 --num_ensemble 20 --outdir ./result --softVote False 
+python3 ensemble.py --epoch 20 --num_ensemble 20 --outdir ./result --softVote False 
 
 ```
 ### Assignment 2

@@ -12,13 +12,29 @@ def load_batch(filename):
     y: label
     Y: one-hot encoding matrix
     """
-    with open(filename, 'rb') as fo:
-        dict = pickle.load(fo, encoding='bytes')
-        X = dict[b"data"] 
-        X = (X-np.mean(X, axis = 1,keepdims=True)) / np.std(X,axis = 1,keepdims=True)
-        X = X.T
-        y = dict[b"labels"]
-        Y = np.eye(10)[y].T
+    if isinstance(filename,list):
+        for i, file in enumerate(filename):
+            with open(file, 'rb') as fo:
+                dict = pickle.load(fo, encoding='bytes')
+                X_batch = dict[b"data"] / 255
+                X_batch = X_batch.T
+                y_batch = dict[b"labels"]
+                Y_batch = np.eye(10)[y_batch].T
+            if i == 0 :
+                X = X_batch
+                Y = Y_batch
+                y = y_batch
+            else:
+                X = np.concatenate((X,X_batch),axis =1)
+                Y = np.concatenate((Y,Y_batch),axis =1)
+                y += y_batch
+    else:
+        with open(filename,'rb') as fo:
+            dict = pickle.load(fo, encoding='bytes')
+            X = dict[b"data"] / 255
+            X = X.T
+            y = dict[b"labels"]
+            Y = np.eye(10)[y].T
 
     return X, y, Y
 
@@ -129,7 +145,7 @@ class NNmodel():
 
         return J
 
-    def computLoss(self,X,Y):
+    def computeLoss(self,X,Y):
 
         p = self.evaluateClassifier(X) ## k x n
         J = (1/X.shape[1]) * -np.sum(Y * np.log(p)) + self.lmda * (np.sum(self.weight**2))
@@ -267,14 +283,15 @@ def main():
     parser.add_argument('--lr', default = 0.01, type=float, help = "learning rate")
     parser.add_argument('--lmda', default = 0.01, type=float, help = "parameter of L2 regularization")
     parser.add_argument('--outdir', default='./result', type= str, help = " the directory to save the output plot")
-    parser.add_argument('--Xavier', default= 0, type= bool, help = " Use Xavier Initialization or not. (bonus)")
-    parser.add_argument('--shuffle', default= 1, type= bool, help = "Shuffle the input image or not. (bonus)")
-    parser.add_argument('--lr_scheduler', default= 0, type= bool, help = "Do learning rate scheduler or not. (bonus)")
+    parser.add_argument('--Xavier', default= True, type= bool, help = " Use Xavier Initialization or not. (bonus)")
+    parser.add_argument('--shuffle', default= True, type= bool, help = "Shuffle the input image or not. (bonus)")
+    parser.add_argument('--lr_scheduler', default= False, type= bool, help = "Do learning rate scheduler or not. (bonus)")
     args = parser.parse_args()
 
     if not os.path.exists(args.outdir):
         os.mkdir(args.outdir)
     train_filename = ["../Dataset/cifar/data_batch_1","../Dataset/cifar/data_batch_3","../Dataset/cifar/data_batch_4","../Dataset/cifar/data_batch_5"]
+    # train_filename = "../Dataset/cifar/data_batch_1","../Dataset/cifar/data_batch_3","../Dataset/cifar/data_batch_4","../Dataset/cifar/data_batch_5"]
     val_filename = "../Dataset/cifar/data_batch_2"
     test_filename = "../Dataset/cifar/test_batch"
 

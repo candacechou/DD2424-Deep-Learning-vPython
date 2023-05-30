@@ -25,7 +25,7 @@ def main():
     if not os.path.exists(args.outdir):
         os.mkdir(args.outdir)
     
-    train_filename = "../Dataset/cifar/data_batch_1"
+    train_filename = ["../Dataset/cifar/data_batch_1","../Dataset/cifar/data_batch_3","../Dataset/cifar/data_batch_4","../Dataset/cifar/data_batch_5"]
     val_filename = "../Dataset/cifar/data_batch_2"
     test_filename = "../Dataset/cifar/test_batch"
 

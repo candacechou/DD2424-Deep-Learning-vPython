@@ -13,13 +13,29 @@ def load_batch(filename):
     y: label
     Y: one-hot encoding matrix
     """
-
-    with open(filename, 'rb') as fo:
-        dict = pickle.load(fo, encoding='bytes')
-        X = dict[b"data"] / 255
-        X = X.T
-        y = dict[b"labels"]
-        Y = np.eye(10)[y].T
+    if isinstance(filename,list):
+        for i, file in enumerate(filename):
+            with open(file, 'rb') as fo:
+                dict = pickle.load(fo, encoding='bytes')
+                X_batch = dict[b"data"] / 255
+                X_batch = X_batch.T
+                y_batch = dict[b"labels"]
+                Y_batch = np.eye(10)[y_batch].T
+            if i == 0 :
+                X = X_batch
+                Y = Y_batch
+                y = y_batch
+            else:
+                X = np.concatenate((X,X_batch),axis =1)
+                Y = np.concatenate((Y,Y_batch),axis =1)
+                y += y_batch
+    else:
+        with open(filename,'rb') as fo:
+            dict = pickle.load(fo, encoding='bytes')
+            X = dict[b"data"] / 255
+            X = X.T
+            y = dict[b"labels"]
+            Y = np.eye(10)[y].T
 
     return X, y, Y
 
@@ -268,7 +284,7 @@ def main():
 
     if not os.path.exists(args.outdir):
         os.mkdir(args.outdir)
-    train_filename = "../Dataset/cifar/data_batch_1"
+     train_filename = ["../Dataset/cifar/data_batch_1","../Dataset/cifar/data_batch_3","../Dataset/cifar/data_batch_4","../Dataset/cifar/data_batch_5"]
     val_filename = "../Dataset/cifar/data_batch_2"
     test_filename = "../Dataset/cifar/test_batch"
 
